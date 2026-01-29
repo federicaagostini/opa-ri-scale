@@ -24,6 +24,16 @@ jobs:
           echo "Bundle tag: $BUNDLE_TAG"
           echo "BUNDLE_TAG=${BUNDLE_TAG}" >> $GITHUB_ENV
 
+      - name: Build OPA bundle (OCI layout)
+        run: |
+          opa build opa/policies/dep --output ./bundle-oci
+
+      - name: Install ORAS
+        run: |
+          curl -LO https://github.com/oras-project/oras/releases/latest/download/oras_linux_amd64.tar.gz
+          tar -xzf oras_linux_amd64.tar.gz
+          sudo mv oras /usr/local/bin/
+
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
@@ -31,13 +41,11 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build OPA bundle as OCI image
+      - name: Push bundle to GHCR
         run: |
-          opa build OPA/policies --output oci:ghcr.io/${{ github.repository_owner }}/opa-dep:${BUNDLE_TAG} --push
-
-      - name: Push bundle OCI image
-        run: |
-          docker push ghcr.io/${{ github.repository_owner }}/opa-dep:${BUNDLE_TAG}
+          oras push \
+          ghcr.io/${{ github.repository_owner }}/opa-dep:${BUNDLE_TAG} \
+          ./bundle-oci:application/vnd.oci.image.layer.v1.tar
 
       - name: Bundle URL
         run: |
