@@ -1,6 +1,12 @@
 name: Publish OPA Bundle
 
-on: [push, pull_request]
+on: 
+  push:
+    paths:
+      - 'OPA/policies/**'
+  pull_request:
+    paths:
+      - 'OPA/policies/**'
 
 jobs:
   build-and-publish:
