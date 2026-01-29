@@ -36,7 +36,7 @@ jobs:
 
       - name: Build OPA bundle as OCI image
         run: |
-          opa build opa/policies --output oci:ghcr.io/${{ github.repository_owner }}/opa-dep:${BUNDLE_TAG}
+          opa build OPA/policies --output oci:ghcr.io/${{ github.repository_owner }}/opa-dep:${BUNDLE_TAG}
 
       - name: Push bundle OCI image
         run: |
