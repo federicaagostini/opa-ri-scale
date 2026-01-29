@@ -1,0 +1,33 @@
+services:
+  opa:
+    image: openpolicyagent/opa:latest-debug
+    ports:
+      - "8181:8181"
+
+    environment:
+      GHCR_TOKEN: ${GHCR_TOKEN}
+    
+    volumes:
+      - ./OPA/conf:/etc/opa/conf
+
+    healthcheck:
+      test: ["CMD", "curl", "http://localhost:8181/health"]
+    
+    command: run --server --log-level debug -c /etc/opa/conf/config-pull.yaml --authentication=token --authorization=basic --addr http://0.0.0.0:8181
+
+    networks:
+      default:
+        aliases:
+          - opa-pull.test.example
+
+  client:
+    image: indigoiam/robot-framework:latest
+
+    volumes:
+      - ./OPA/examples:/opa-examples
+      - ./oidc-agent:/home/test/.config/oidc-agent
+
+    healthcheck:
+      test: ["CMD", "curl", "https://google.com"]
+
+    entrypoint: sleep infinity
