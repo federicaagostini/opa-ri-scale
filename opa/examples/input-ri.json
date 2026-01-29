@@ -1,0 +1,14 @@
+{
+    "input": {
+        "action": "write",
+        "resource": {
+            "id": "https://data.ri.eu/dataset/abc123"
+        },
+        "token": {
+            "acr": "https://refeds.org/profile/mfa",
+            "entitlements": [
+                "urn:example:aai.example.org:group:project-ri:role=xfer"
+            ]
+        }
+    }
+}

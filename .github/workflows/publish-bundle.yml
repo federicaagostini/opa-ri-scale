@@ -1,0 +1,47 @@
+name: Publish OPA Bundle
+
+on: [push, pull_request]
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Download OPA CLI
+        run: |
+          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+          chmod +x opa
+          sudo mv opa /usr/local/bin/opa
+
+      - name: Set bundle version
+        id: vars
+        run: |
+          if [ -n "${GITHUB_REF_NAME}" ]; then
+            echo "BUNDLE_TAG=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+          else
+            SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-8)
+            echo "BUNDLE_TAG=ci-${SHORT_SHA}" >> $GITHUB_ENV
+          fi
+          echo "Bundle tag: $BUNDLE_TAG"
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build OPA bundle as OCI image
+        run: |
+          opa build opa/policies --output oci:ghcr.io/${{ github.repository_owner }}/opa-dep:${BUNDLE_TAG}
+
+      - name: Push bundle OCI image
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/opa-dep:${BUNDLE_TAG}
+
+      - name: Bundle URL
+        run: |
+          echo "Bundle OCI URL: ghcr.io/${{ github.repository_owner }}/opa-dep:${BUNDLE_TAG}"
