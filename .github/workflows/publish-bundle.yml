@@ -26,7 +26,7 @@ jobs:
 
       - name: Build OPA bundle (OCI layout)
         run: |
-          opa build opa/policies/dep --output ./bundle-oci
+          opa build OPA/policies --output ./bundle-oci
 
       - name: Install ORAS
         run: |
@@ -44,8 +44,8 @@ jobs:
       - name: Push bundle to GHCR
         run: |
           oras push \
-          ghcr.io/${{ github.repository_owner }}/opa-dep:${BUNDLE_TAG} \
-          ./bundle-oci:application/vnd.oci.image.layer.v1.tar
+            ghcr.io/${{ github.repository_owner }}/opa-dep:${BUNDLE_TAG} \
+            ./bundle-oci:application/vnd.oci.image.layer.v1.tar
 
       - name: Bundle URL
         run: |
