@@ -1,0 +1,2 @@
+CLIENT_ID=${CLIENT_ID:-changeme}
+CLIENT_SECRET=${CLIENT_SECRET:-changeme}

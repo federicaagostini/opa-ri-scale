@@ -33,7 +33,11 @@ jobs:
           echo "Bundle tag: $BUNDLE_TAG"
           echo "BUNDLE_TAG=${BUNDLE_TAG}" >> $GITHUB_ENV
 
-      - name: Build OPA bundle (OCI layout)
+      - name: Download ODRL policies
+        run: |
+          ./scripts/get-policies
+
+      - name: Build OPA bundle
         run: |
           opa build OPA/policies --output dep.tar.gz
 
