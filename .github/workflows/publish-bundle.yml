@@ -1,12 +1,6 @@
 name: Publish OPA Bundle
 
-on: 
-  push:
-    paths:
-      - 'OPA/policies/**'
-  pull_request:
-    paths:
-      - 'OPA/policies/**'
+on: [push, pull_request]
 
 jobs:
   build-and-publish:
@@ -32,7 +26,7 @@ jobs:
 
       - name: Build OPA bundle (OCI layout)
         run: |
-          opa build OPA/policies --output ./bundle-oci
+          opa build OPA/policies --output dep.tar.gz
 
       - name: Install ORAS
         run: |
@@ -52,10 +46,10 @@ jobs:
       - name: Push bundle to GHCR
         run: |
           IMAGE=ghcr.io/${{ github.repository_owner }}/opa-dep
-          MEDIA_TYPE=application/vnd.oci.image.layer.v1.tar
+          MEDIA_TYPE=application/vnd.openpolicyagent.bundle.layer.v1.tar+gzip
 
-          oras push ${IMAGE}:${BUNDLE_TAG} ./bundle-oci:${MEDIA_TYPE}
-          oras push ${IMAGE}:latest ./bundle-oci:${MEDIA_TYPE}
+          oras push ${IMAGE}:${BUNDLE_TAG} dep.tar.gz:${MEDIA_TYPE}
+          oras push ${IMAGE}:latest  dep.tar.gz:${MEDIA_TYPE}
 
       - name: Bundle URL
         run: |
