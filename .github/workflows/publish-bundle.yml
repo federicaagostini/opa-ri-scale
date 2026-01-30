@@ -42,7 +42,7 @@ jobs:
 
       - name: Download ODRL policies
         run: |
-          ./scripts/get-policies
+          ./scripts/get-policies.sh
         env:
           CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
           CLIENT_ID: ${{ secrets.CLIENT_ID }}
