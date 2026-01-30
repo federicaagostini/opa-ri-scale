@@ -1,6 +1,12 @@
 name: Publish OPA Bundle
 
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - 'OPA/policies/**'
+  pull_request:
+    paths:
+      - 'OPA/policies/**'
 
 jobs:
   build-and-publish:
@@ -19,8 +25,11 @@ jobs:
       - name: Set bundle version
         id: vars
         run: |
-          SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-8)
-          BUNDLE_TAG=${SHORT_SHA}
+          if [[ "${GITHUB_REF_TYPE}" = "tag" ]]; then
+            BUNDLE_TAG="${GITHUB_REF_NAME}"
+          else
+            BUNDLE_TAG="${GITHUB_SHA::8}"
+          fi
           echo "Bundle tag: $BUNDLE_TAG"
           echo "BUNDLE_TAG=${BUNDLE_TAG}" >> $GITHUB_ENV
 
