@@ -1,3 +1,4 @@
+.env
 opa
 data.json
-secrets.sh
+scripts/secrets.sh
