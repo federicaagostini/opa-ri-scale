@@ -4,7 +4,7 @@ set -euo pipefail
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
 source "${SCRIPT_DIR}/config.sh"
-source "${SCRIPT_DIR}/secrets.sh"
+# source "${SCRIPT_DIR}/secrets.sh"
 
 BT=$(curl -s -d "client_id=${CLIENT_ID}" -d "client_secret=${CLIENT_SECRET}" \
       -d "grant_type=client_credentials" -d "scope=policies:read policies:write" \
