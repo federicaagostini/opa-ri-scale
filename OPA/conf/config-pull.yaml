@@ -2,9 +2,6 @@ services:
   gh:
     url: https://ghcr.io
     type: oci
-    credentials:
-      bearer:
-        token: ${GHCR_TOKEN}
 
 bundles:
   dep:

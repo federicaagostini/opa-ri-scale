@@ -2,11 +2,9 @@
 
 This repo holds the [Open Policy Agent](https://www.openpolicyagent.org/) authorization rules which are applied in the context of the RI-SCALE project.
 
-Any commit to the `OPA/policies` directory will trigger a GitHub workflow which downloads the static policies in ODRL format from the API (https://odrl-repo.dep.dev.rciam.grnet.gr/policies) and builds a bundle of policies and rego files for OPA. The bundle is published on the GitHub registry (`ghcr.io/federicaagostini/opa-dep:latest`), so that RI communities can deploy an OPA service which reads the remote bundle and optionally adds further policies.
+Any commit to the `OPA/policies` directory will trigger a GitHub workflow which downloads the static policies in ODRL format from the API (https://odrl-repo.dep.dev.rciam.grnet.gr/policies) and builds a bundle of policies and rego files for OPA. Moreover, the same job runs every 12 hours in order to keep the policies updated. The bundle is published on the GitHub registry (`ghcr.io/federicaagostini/opa-dep:latest`), so that RI communities can deploy an OPA service which reads the remote bundle and optionally adds further policies.
 
 Also, here we setup a basic deployment with docker compose to test the workflow. A way to deploy OPA is shown in this README.
-
-## Deploy
 
 ## Test
 
@@ -86,4 +84,151 @@ To check the policies and save them in the `data` file run
 
 ```bash
 ./scripts/get-policies.sh
+```
+
+## Deploy
+
+To expose an OPA server which downloads the remote bundle and makes policy decisions we can use docker or the OPA command line.
+
+### OPA Configuration
+
+A minimal configuration YAML file for OPA would be
+
+```yml
+services:
+  gh:
+    url: https://ghcr.io
+    type: oci
+
+bundles:
+  dep:
+    service: gh
+    resource: ghcr.io/federicaagostini/opa-dep:latest
+
+default_decision: dep
+```
+
+If you require to apply authorization policies also to OPA APIs, please add
+
+```yaml
+default_authorization_decision: /system/authz/allow
+```
+
+If you want to persist the bundle, add
+
+```yml
+bundles:
+  dep:
+    persist: true
+
+persistence_directory: /directory/for/persistence
+```
+
+in case you want to customize the polling period, add
+
+```yml
+bundles:
+  dep:
+    polling:
+      min_delay_seconds: 10 # default to 300
+      max_delay_seconds: 20 # default to 600
+```
+
+For other configuration parameters see the [OPA documentation](https://www.openpolicyagent.org/docs/configuration).
+
+### Run with Docker
+
+To run opa with docker the minimal argument required are
+
+```bash
+docker run -p <server-port>:<server-port> \
+  -v <path-to-config-file>:/etc/opa/opa-conf.yaml \
+  -v /var/log/opa:/logs \
+  openpolicyagent/opa:latest \
+  run -s -c /etc/opa/opa-conf.yaml --addr http://localhost:<server-port> \
+  > ./logs/access.log \
+  2> ./logs/error.log
+```
+
+### Run with CLI
+
+Download the OPA command line from the [documentation](https://www.openpolicyagent.org/docs/configuration) and install the command. E.g. for linux it would be
+
+```bash
+curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+chmod +x opa
+sudo mv opa /usr/local/bin/opa
+```
+
+Run OPA with the minimum argument required
+
+```bash
+opa run -s -c <path-to-config-file> --addr http://localhost:<server-port> \
+  > ./logs/access.log \
+  2> ./logs/error.log
+```
+
+### Run configurations
+
+The `opa run` command allows you to add several flags, for instance
+
+- `authentication`: set the authentication schema. Possible values are token, tls, off
+- `authorization`: set the authorization schema. Possible values are basic, off
+- `config-file`: path for the configuration file
+- `log-level`: set the log level. Possible values are debug, info, error
+- `log-format`: set log format. Possible values are text, json, json-pretty
+- `set`: requires a key-value string which overrides the configuration
+
+Fore a full list of configuration please check the [documentation](https://www.openpolicyagent.org/docs/cli#run).
+
+#### TLS
+
+In a production environment we strongly recomand to expose OPA with HTTPS.
+So, first of all request a certificate for the OPA instance and add the following flags to the `opa run` commands
+
+```bash
+--tls-cert-file <path-to-certificate>.pem --tls-private-key-file <path-to-private-key>.pem
+```
+
+you should also modify the `addr` flag with something like
+
+```bash
+--addr https://0.0.0.0:<server-port>
+```
+
+### Wrap-up
+
+A comprensive OPA configuration would be
+
+```yaml
+services:
+  gh:
+    url: https://ghcr.io
+    type: oci
+
+bundles:
+  dep:
+    service: gh
+    resource: ghcr.io/federicaagostini/opa-dep:latest
+    persist: true
+    polling:
+      min_delay_seconds: 100
+      max_delay_seconds: 200
+
+default_decision: dep
+default_authorization_decision: /system/authz/allow
+
+persistence_directory: /tmp/opa
+```
+
+and OPA run with TLS and the following arguments
+
+```bash
+opa run -s -c <path-to-config-file>.yaml --addr https://0.0.0.0:<server-port> \
+  --authentication=token --authorization=basic \
+  --tls-ca-cert-file <path-to-ca> --tls-cert-file <path-to-cert>.pem \
+  --tls-private-key-file <path-to-private-key> \
+  --log-level debug --log-format text
+  > ./logs/access.log \
+  2> ./logs/error.log
 ```

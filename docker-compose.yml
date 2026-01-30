@@ -16,7 +16,7 @@ services:
 
     command: >
       run --server
-      --log-level debug
+      --log-level debug --log-format text
       -c /etc/opa/conf/config-pull.yaml
       --addr http://0.0.0.0:8182
       --watch
