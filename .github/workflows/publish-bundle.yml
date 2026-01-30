@@ -8,6 +8,9 @@ on:
     paths:
       - 'OPA/policies/**'
 
+  schedule:
+    - cron: '*/5 * * * *'
+
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
@@ -27,8 +30,10 @@ jobs:
         run: |
           if [[ "${GITHUB_REF_TYPE}" = "tag" ]]; then
             BUNDLE_TAG="${GITHUB_REF_NAME}"
-          else
+          elif [ "${GITHUB_EVENT_NAME}" = "push" ] || [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
             BUNDLE_TAG="${GITHUB_SHA::8}"
+          else
+            BUNDLE_TAG="latest"
           fi
           echo "Bundle tag: $BUNDLE_TAG"
           echo "BUNDLE_TAG=${BUNDLE_TAG}" >> $GITHUB_ENV
@@ -67,8 +72,13 @@ jobs:
 
           echo "{}" > manifest.config
 
+          oras push ${IMAGE}:latest --config manifest.config:${MT_CONF} dep.tar.gz:${MT_IMAGE}
+
+          if [ "${BUNDLE_TAG}" = "latest" ]; then
+            echo "BUNDLE_TAG is latest, done."
+            exit 0
+          fi
           oras push ${IMAGE}:${BUNDLE_TAG} --config manifest.config:${MT_CONF} dep.tar.gz:${MT_IMAGE}
-          oras push ${IMAGE}:latest  --config manifest.config:${MT_CONF} dep.tar.gz:${MT_IMAGE}
 
       - name: Bundle URL
         run: |
