@@ -46,10 +46,13 @@ jobs:
       - name: Push bundle to GHCR
         run: |
           IMAGE=ghcr.io/${{ github.repository_owner }}/opa-dep
-          MEDIA_TYPE=application/vnd.openpolicyagent.bundle.layer.v1.tar+gzip
+          MT_CONF=application/vnd.oci.image.config.v1+json
+          MT_IMAGE=application/vnd.oci.image.layer.v1.tar+gzip
 
-          oras push ${IMAGE}:${BUNDLE_TAG} dep.tar.gz:${MEDIA_TYPE}
-          oras push ${IMAGE}:latest  dep.tar.gz:${MEDIA_TYPE}
+          echo "{}" > manifest.config
+
+          oras push ${IMAGE}:${BUNDLE_TAG} --config manifest.config:${MT_CONF} dep.tar.gz:${MT_IMAGE}
+          oras push ${IMAGE}:latest  --config manifest.config:${MT_CONF} dep.tar.gz:${MT_IMAGE}
 
       - name: Bundle URL
         run: |
