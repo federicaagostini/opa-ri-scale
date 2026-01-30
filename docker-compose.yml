@@ -1,8 +1,9 @@
 services:
-  opa:
+
+  opa-bundle:
     image: openpolicyagent/opa:latest-debug
     ports:
-      - "8181:8181"
+      - "8182:8182"
 
     environment:
       GHCR_TOKEN: ${GHCR_TOKEN}
@@ -11,14 +12,44 @@ services:
       - ./OPA/conf:/etc/opa/conf
 
     healthcheck:
-      test: ["CMD", "curl", "http://localhost:8181/health"]
-    
-    command: run --server --log-level debug -c /etc/opa/conf/config-pull.yaml --authentication=token --authorization=basic --addr http://0.0.0.0:8181
+      test: ["CMD", "curl", "http://localhost:8182/health"]
+
+    command: >
+      run --server
+      --log-level debug
+      -c /etc/opa/conf/config-pull.yaml
+      --addr http://0.0.0.0:8182
+      --watch
+      --authentication=token --authorization=basic
 
     networks:
       default:
         aliases:
-          - opa-pull.test.example
+          - opa-bundle.test.example
+
+  opa-local:
+    image: openpolicyagent/opa:latest-debug
+    ports:
+      - "8181:8181"
+    
+    volumes:
+      - ./OPA:/etc/opa
+
+    healthcheck:
+      test: ["CMD", "curl", "http://localhost:8181/health"]
+    
+    command: > 
+      run --server /etc/opa/policies
+      --log-level debug
+      -c /etc/opa/conf/config-push.yaml
+      --addr http://0.0.0.0:8181
+      --watch
+      --authentication=token --authorization=basic
+
+    networks:
+      default:
+        aliases:
+          - opa-local.test.example
 
   client:
     image: indigoiam/robot-framework:latest
