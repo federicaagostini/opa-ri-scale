@@ -57,6 +57,7 @@ services:
     volumes:
       - ./OPA/examples:/opa-examples
       - ./oidc-agent:/home/test/.config/oidc-agent
+      - ./scripts:/scripts
 
     healthcheck:
       test: ["CMD", "curl", "https://google.com"]
