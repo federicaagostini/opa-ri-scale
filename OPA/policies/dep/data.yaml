@@ -4,3 +4,8 @@ policies:
   constraint:
   - acr: https://refeds.org/profile/mfa
   target: https://data.deps.eu/dataset/abc123
+- action: write
+  assignee: urn:example:aai.example.org:group:project-x:role=xfer
+  constraint:
+  - acr: https://refeds.org/profile/mfa
+  target: https://data.deps.eu/dataset/abc456
