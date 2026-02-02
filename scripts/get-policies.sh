@@ -11,10 +11,13 @@ BT=$(curl -s -d "client_id=${CLIENT_ID}" -d "client_secret=${CLIENT_SECRET}" \
       "${TOKEN_ENDPOINT}" | jq -r '.access_token')
 
 REPO_ROOT=$(realpath "${SCRIPT_DIR}/..")
-OUT_FILE_PATH="${REPO_ROOT}/OPA/policies/dep/${OUT_FILE_NAME}"
+OUT_FILE_PATH="${REPO_ROOT}/OPA/policies/dep/odrl/${OUT_FILE_NAME}"
+OUT_FILE="${OUT_FILE_PATH}/${OUT_FILE_NAME}"
+
+mkdir -p ${OUT_FILE_PATH}
 
 curl "${ODRL_API_ENDPOINT}" -L -f -s \
-  -H "Authorization: Bearer $BT" | jq \
-    > "${OUT_FILE_PATH}"
+  -H "Authorization: Bearer $BT" | jq '{ policies: [.items[].odrlPolicy] }' \
+    > "${OUT_FILE}"
 
-echo "Policies successfully downloaded in ${OUT_FILE_PATH}"
+echo "Policies successfully downloaded in ${OUT_FILE}"
