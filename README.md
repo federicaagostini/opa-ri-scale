@@ -249,6 +249,14 @@ The available configuration parameters to start the script are:
 * `--access-log`: path to access log (default is in _/var/log/opa/access.log_)
 * `--error-log`: path to error log (default is in _/var/log/opa/error.log_)
 
+To and stop OPA, add the folder to the PATH variable and type
+
+```bash
+PATH=$PATH:<path-to-scripts>
+start-opa.sh
+stop-opa.sh
+```
+
 ### Wrap-up
 
 Install OPA via RPM
@@ -292,5 +300,6 @@ decision_logs:
 and run OPA server with
 
 ```bash
-./scripts/start-opa.sh
+PATH=$PATH:<path-to-scripts>
+start-opa.sh
 ```
