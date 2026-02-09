@@ -61,7 +61,7 @@ opa run -s -c "$CONFIG_FILE" \
   --tls-private-key-file "$KEY_FILE" \
   --log-level "$LOG_LEVEL" \
   --log-format text \
-  > "$ACCESS_LOG" 2> "$ERROR_LOG" &
+  > "$ERROR_LOG" 2> "$ACCESS_LOG" &
   echo $! > "$PID_FILE"
 
 echo "OPA started (PID $(cat $PID_FILE))"
