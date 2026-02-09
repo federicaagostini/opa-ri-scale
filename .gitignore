@@ -1,3 +1,4 @@
 opa
 data.json
 scripts/secrets.sh
+opa.pid
