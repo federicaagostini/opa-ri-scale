@@ -1,14 +1,15 @@
 #!/bin/bash
 set -euo pipefail
 
+SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
-PID_FILE="opa.pid"
+PID_FILE="${SCRIPT_DIR}/opa.pid"
 LOG_DIR="/var/log/opa"
 
 ACCESS_LOG="$LOG_DIR/access.log"
 ERROR_LOG="$LOG_DIR/error.log"
 
-DATE=$(date +"%Y%m%d")
+DATE=$(date +"%Y%m%d-%H%M")
 
 if [[ ! -f "$PID_FILE" ]]; then
   echo "OPA not running (PID file $PID_FILE not found)."
