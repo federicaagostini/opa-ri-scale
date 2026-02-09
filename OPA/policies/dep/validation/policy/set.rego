@@ -1,4 +1,4 @@
-package dep.validation.policy.set
+package dep.validation.policy
 
 import data.dep.validation.policy.policy_class_is_valid
 import rego.v1

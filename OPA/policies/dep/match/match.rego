@@ -1,7 +1,7 @@
 package dep.match
 
-import data.dep.utils.data_parser.parsed_policies
-import data.dep.utils.property._property
+import data.dep.utils.parsed_policies
+import data.dep.utils._property
 import rego.v1
 
 matched_policies contains policy if {

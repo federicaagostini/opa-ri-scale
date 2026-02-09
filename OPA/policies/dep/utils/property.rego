@@ -1,4 +1,4 @@
-package dep.utils.property
+package dep.utils
 
 import rego.v1
 

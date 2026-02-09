@@ -1,9 +1,9 @@
 package dep.validation.policy
 
-import data.dep.validation.policy.set.set_is_valid
-import data.dep.validation.policy.offer.offer_is_valid
-import data.dep.validation.policy.agreement.agreement_is_valid
-import data.dep.utils.property._property
+import data.dep.validation.policy.set_is_valid
+import data.dep.validation.policy.offer_is_valid
+import data.dep.validation.policy.agreement_is_valid
+import data.dep.utils._property
 import rego.v1
 
 default policy_class_is_valid(_) := false

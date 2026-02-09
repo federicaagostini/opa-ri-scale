@@ -1,7 +1,7 @@
-package dep.validation.policy.agreement
+package dep.validation.policy
 
 import data.dep.validation.policy.policy_class_is_valid
-import data.data.dep.utils.property._property
+import data.data.dep.utils._property
 import rego.v1
 
 default agreement_is_valid(_) := false

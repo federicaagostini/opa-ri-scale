@@ -1,4 +1,4 @@
-package dep.utils.data_parser
+package dep.utils
 
 import rego.v1
 
