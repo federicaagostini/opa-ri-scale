@@ -1,6 +1,11 @@
 policies:
-- action: read
-  assignee: urn:example:aai.example.org:group:project-x:role=member
-  constraint:
-  - acr: https://refeds.org/profile/mfa
-  target: https://data.deps.eu/dataset/abc123
+- type: Set
+  permission:
+  - action: read
+    target: https://data.deps.eu/dataset/abc123
+    assignee: urn:example:aai.example.org:group:project-x:role=member
+    constraint:
+    - leftOperand: acr
+      operator: eq
+      rightOperand: https://refeds.org/profile/mfa
+
