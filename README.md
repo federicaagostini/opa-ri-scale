@@ -2,7 +2,7 @@
 
 This repo holds the [Open Policy Agent](https://www.openpolicyagent.org/) authorization rules which are applied in the context of the RI-SCALE project.
 
-Any commit to the `OPA/policies` directory will trigger a GitHub workflow which downloads the static policies in ODRL format from the API (https://odrl-repo.dep.dev.rciam.grnet.gr/policies) and builds a bundle of policies and rego files for OPA. Moreover, the same job runs every 12 hours in order to keep the policies updated. The bundle is published on the GitHub registry (`ghcr.io/federicaagostini/opa-dep:latest`), so that RI communities can deploy an OPA service which reads the remote bundle and optionally adds further policies.
+Any commit to the `OPA/policies` directory will trigger a GitHub workflow which downloads the static policies in ODRL format from the API (https://odrl-repo.dep.dev.rciam.grnet.gr/policies) and builds a bundle of policies and rego files for OPA. Moreover, the same job runs every 12 hours in order to keep the policies updated. The bundle is published on the GitHub registry (`ghcr.io/federicaagostini/opa-dep:latest`), so that RI communities can deploy an OPA service which reads the remote bundle and optionally adds further policies. Access to the bundle is limited to people in the same organization, so you will require a  Personal Access Token or basic authentication with username/password.
 
 Also, here we setup a basic deployment with docker compose to test the workflow. A way to deploy OPA is shown in this README.
 
@@ -13,7 +13,7 @@ We can use the [docker-compose](./docker-compose.yml) file to test the integrati
 - `opa-local`:  runs the policies locally and a live reload is also applied (useful for development). Within the docker network it is reachable at http://opa-local.test.example:8181
 - `client`: client container used to test the OPA integration.
 
-To connect to the bundle hosted on the GitHub registry please add your GitHub Personal Access Token with at least `read:packages`, `read:project` and `repo` scopes in the [.env](./.env) file.
+To connect to the bundle hosted on the GitHub private registry please add your GitHub Personal Access Token with at least `read:packages`, `read:project` and `repo` scopes in the [.env](./.env) file.
 
 For the next tests, run the services and enter in the `client` container:
 
@@ -169,7 +169,7 @@ For other configuration parameters see the [OPA documentation](https://www.openp
 
 ### Run with Docker
 
-To run opa with docker the minimal argument required (note that access and error logs are swaped in OPA) are
+To run opa with docker the minimal arguments required (note that access and error logs are swaped in OPA) are
 
 ```bash
 docker run -p <server-port>:<server-port> \
@@ -191,14 +191,14 @@ Add the CNAF repofile for OPA
 wget -O /etc/yum.repos.d/opa.repo https://repo.cloud.cnaf.infn.it/repository/opa/opa.repo
 ```
 
-update and install OPA
+update the available repofiles and install OPA
 
 ```bash
 dnf makecache
 dnf install -y opa
 ```
 
-Run OPA with the minimum argument required (note that access and error logs are swaped in OPA)
+Run OPA with the minimum arguments required (note that access and error logs are swaped in OPA)
 
 ```bash
 opa run -s -c <path-to-config-file> --addr http://localhost:<server-port> \
@@ -215,6 +215,7 @@ The `opa run` command allows you to add several flags, for instance
 - `config-file`: path for the configuration file
 - `log-level`: set the log level. Possible values are debug, info, error
 - `log-format`: set log format. Possible values are text, json, json-pretty
+- `watch`: supports a live reload for the OPA source code (_rego_)
 - `set`: requires a key-value string which overrides the configuration
 
 Fore a full list of configuration please check the [documentation](https://www.openpolicyagent.org/docs/cli#run).
@@ -238,17 +239,27 @@ you should also modify the `addr` flag with something like
 
 This repo contains scripts to [start](./scripts/start-opa.sh) (with defaults) and [stop](./scripts/stop-opa.sh) OPA. The scripts can be run by any folder.
 
-Type
+The available configuration parameters to start the script are:
 
-```bash
-./scripts/start-opa.sh --help
-```
-
-to check the available configuration parameters.
+* `-c|--config`: path to configuration file (default is _config.yaml_)
+* `-p|--port`: OPA server port (default is _8181_)
+* `--cert`: path to server certificate (default is _hostcert.pem_)
+* `--key`: path to server private key (default is _hostkey.pem_)
+* `--log-level`: set the log level (default is _info_)
+* `--access-log`: path to access log (default is in _/var/log/opa/access.log_)
+* `--error-log`: path to error log (default is in _/var/log/opa/error.log_)
 
 ### Wrap-up
 
-A comprensive OPA configuration would be
+Install OPA via RPM
+
+```bash
+wget -O /etc/yum.repos.d/opa.repo https://repo.cloud.cnaf.infn.it/repository/opa/opa.repo
+dnf makecache
+dnf install -y opa
+```
+
+Add a comprensive OPA configuration
 
 ```yaml
 services:
@@ -278,12 +289,8 @@ decision_logs:
   console: true
 ```
 
-and OPA run with TLS and the following arguments
+and run OPA server with
 
 ```bash
-opa run -s -c <path-to-config-file>.yaml --addr https://0.0.0.0:<server-port> \
-  --authentication=token --authorization=basic \
-  --tls-cert-file <path-to-cert>.pem --tls-private-key-file <path-to-private-key> \
-  --log-level debug --log-format text \
-  > /var/log/opa/error.log 2> /var/log/opa/access.log &
+./scripts/start-opa.sh
 ```
