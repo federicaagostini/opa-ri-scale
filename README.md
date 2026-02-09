@@ -2,7 +2,7 @@
 
 This repo holds the [Open Policy Agent](https://www.openpolicyagent.org/) authorization rules which are applied in the context of the RI-SCALE project.
 
-Any commit to the `OPA/policies` directory will trigger a GitHub workflow which downloads the static policies in ODRL format from the API (https://odrl-repo.dep.dev.rciam.grnet.gr/policies) and builds a bundle of policies and rego files for OPA. Moreover, the same job runs every 12 hours in order to keep the policies updated. The bundle is published on the GitHub registry (`ghcr.io/federicaagostini/opa-dep:latest`), so that RI communities can deploy an OPA service which reads the remote bundle and optionally adds further policies. Access to the bundle is limited to people in the same organization, so you will require a  Personal Access Token or basic authentication with username/password.
+Any commit to the `OPA/src` directory will trigger a GitHub workflow which downloads the static policies in ODRL format from the API (https://odrl-repo.dep.dev.rciam.grnet.gr/policies) and builds a bundle of policies and rego files for OPA. Moreover, the same job runs every 12 hours in order to keep the policies updated. The bundle is published on the GitHub registry (`ghcr.io/federicaagostini/opa-dep:latest`), so that RI communities can deploy an OPA service which reads the remote bundle and optionally adds further policies. Access to the bundle is limited to people in the same organization, so you will require a  Personal Access Token or basic authentication with username/password.
 
 Also, here we setup a basic deployment with docker compose to test the workflow. A way to deploy OPA is shown in this README.
 
@@ -24,7 +24,7 @@ docker compose exec client bash
 
 ### Query OPA
 
-In order to query OPA, you need to obtain a bearer token issued by the [IAM DEV](https://iam-dev.cloud.cnaf.infn.it), otherwise you can add the list of trusted issuers to the [data](./OPA/policies/system/authz/data.yaml) file. For instance, with the client credential flows it would be like
+In order to query OPA, you need to obtain a bearer token issued by the [IAM DEV](https://iam-dev.cloud.cnaf.infn.it), otherwise you can add the list of trusted issuers to the [data](./OPA/src/system/authz/data.yaml) file. For instance, with the client credential flows it would be like
 
 ```bash
 CLIENT_ID=my-client-id
@@ -47,7 +47,7 @@ $ curl http://opa-local.test.example:8181/v1/data/dep/allow -d@/opa-examples/inp
 }
 ```
 
-Now we want to test write operations such to delete the list of allowed token issuers. For this, the access token also has to contain proper groups (which can be added to the [data](./OPA/policies/system/authz/data.yaml) file), so you need to perform an authorization or device code flow. `oidc-agent` is installed in the container if you need it, or you can use the script `/scripts/dc-get-access-token.sh` (requires you have already registered a client on the AAI).
+Now we want to test write operations such to delete the list of allowed token issuers. For this, the access token also has to contain proper groups (which can be added to the [data](./OPA/src/system/authz/data.yaml) file), so you need to perform an authorization or device code flow. `oidc-agent` is installed in the container if you need it, or you can use the script `/scripts/dc-get-access-token.sh` (requires you have already registered a client on the AAI).
 
 By deleting the list of allowed token issuers from the local OPA, you will no longer be able to access the APIs (the behavior will be back normal when you restart OPA):
 

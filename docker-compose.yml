@@ -39,7 +39,7 @@ services:
       test: ["CMD", "curl", "http://localhost:8181/health"]
     
     command: > 
-      run --server /etc/opa/policies
+      run --server /etc/opa/src
       --log-level debug
       -c /etc/opa/conf/config-push.yaml
       --addr http://0.0.0.0:8181

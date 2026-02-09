@@ -3,10 +3,10 @@ name: Publish OPA Bundle
 on:
   push:
     paths:
-      - 'OPA/policies/**'
+      - 'OPA/src/**'
   pull_request:
     paths:
-      - 'OPA/policies/**'
+      - 'OPA/src/**'
 
   schedule:
     - cron: '0 */12 * * *'
@@ -49,7 +49,7 @@ jobs:
 
       - name: Build OPA bundle
         run: |
-          opa build OPA/policies --output dep.tar.gz
+          opa build OPA/src --output dep.tar.gz
 
       - name: Install ORAS
         run: |
