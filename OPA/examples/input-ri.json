@@ -1,6 +1,6 @@
 {
     "input": {
-        "action": "write",
+        "action": "delete",
         "resource": {
             "id": "https://data.ri.eu/dataset/abc123"
         },

@@ -2,29 +2,18 @@ package dep.match
 
 import data.dep.utils.parsed_policies
 import data.dep.utils._rule
+import data.dep.match.action_is_matched
+import data.dep.match.target_is_matched
+import data.dep.match.assegnee_is_matched
+import data.dep.match.constraint.constraint_is_matched
 import rego.v1
 
-# Policy parsed as from local data
 matched_policies contains policy if {
 	some policy in parsed_policies
 	some rule_type in _rule
 	some rule in policy[rule_type]
-	input.action == rule.action
-	input.resource.id == rule.target
-    some entitlement in input.token.entitlements
-	entitlement == rule.assignee
-    some constraint in rule.constraint
-	input.token.acr == constraint.rightOperand
-}
-
-# Policy parsed as from API
-matched_policies contains policy if {
-	some policy in parsed_policies
-	some rule_type in _rule
-	some rule in policy[rule_type]
-	input.action == rule.action
-	input.resource.id == rule.target
-	some constraint in rule.constraint
-	some entitlement in input.token.entitlements
-	entitlement == constraint.rightOperand
+	action_is_matched(rule)
+	target_is_matched(rule)
+    assegnee_is_matched(rule)
+    constraint_is_matched(rule)
 }
