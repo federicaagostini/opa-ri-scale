@@ -11,5 +11,5 @@ offer_is_valid(policy) if {
     policy.type == "Offer"
     some prop in _property
     some property in policy[prop]
-    property.assegnee
+    property.assegner
 }
