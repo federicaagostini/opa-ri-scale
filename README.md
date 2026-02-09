@@ -90,7 +90,7 @@ To check the policies and save them in the `data` file run
 
 ## Deploy
 
-To expose an OPA server which downloads the remote bundle and makes policy decisions we can use docker or the OPA command line.
+To expose an OPA server which downloads the remote bundle and makes policy decisions we can use docker or the RPM which install the OPA CLI.
 
 ### OPA Configuration
 
@@ -112,7 +112,7 @@ default_decision: dep
 
 To connect to the OPA bundle hosted on the GitHub private registry you require authorization, so you can use _Basic_ credentials with
 
-```bash
+```yml
 services:
   gh:
     credentials:
@@ -123,7 +123,7 @@ services:
 
 or _Bearer_ authentication, after creating your GitHub Personal Access Token (PAT) with at least `read:packages`, `read:project` and `repo` scopes:
 
-```bash
+```yml
 services:
   gh:
     credentials:
@@ -158,11 +158,18 @@ bundles:
       max_delay_seconds: 20 # default to 600
 ```
 
+If you want to log decision information, including request body, response body (that are also shown with the logging level set to DEBUG) and methrics add
+
+```yml
+decision_logs:
+  console: true
+```
+
 For other configuration parameters see the [OPA documentation](https://www.openpolicyagent.org/docs/configuration).
 
 ### Run with Docker
 
-To run opa with docker the minimal argument required are
+To run opa with docker the minimal argument required (note that access and error logs are swaped in OPA) are
 
 ```bash
 docker run -p <server-port>:<server-port> \
@@ -170,26 +177,33 @@ docker run -p <server-port>:<server-port> \
   -v /var/log/opa:/logs \
   openpolicyagent/opa:latest \
   run -s -c /etc/opa/opa-conf.yaml --addr http://localhost:<server-port> \
-  > ./logs/access.log \
-  2> ./logs/error.log
+  > ./logs/error.log \
+  2> ./logs/access.log &
 ```
 
-### Run with CLI
+### Run with RPM
 
-Download the OPA command line from the [documentation](https://www.openpolicyagent.org/docs/configuration) and install the command. E.g. for linux it would be
+We have made available OPA trough RPM. The RPM just downloads the last OPA cli and installs it in the OS.
+
+Add the CNAF repofile for OPA
 
 ```bash
-curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
-chmod +x opa
-sudo mv opa /usr/local/bin/opa
+wget -O /etc/yum.repos.d/opa.repo https://repo.cloud.cnaf.infn.it/repository/opa/opa.repo
 ```
 
-Run OPA with the minimum argument required
+update and install OPA
+
+```bash
+dnf makecache
+dnf install -y opa
+```
+
+Run OPA with the minimum argument required (note that access and error logs are swaped in OPA)
 
 ```bash
 opa run -s -c <path-to-config-file> --addr http://localhost:<server-port> \
-  > ./logs/access.log \
-  2> ./logs/error.log
+  > ./logs/error.log \
+  2> ./logs/access.log &
 ```
 
 ### Run configurations
@@ -220,6 +234,18 @@ you should also modify the `addr` flag with something like
 --addr https://0.0.0.0:<server-port>
 ```
 
+### Start and stop OPA
+
+This repo contains scripts to [start](./scripts/start-opa.sh) (with defaults) and [stop](./scripts/stop-opa.sh) OPA. The scripts can be run by any folder.
+
+Type
+
+```bash
+./scripts/start-opa.sh --help
+```
+
+to check the available configuration parameters.
+
 ### Wrap-up
 
 A comprensive OPA configuration would be
@@ -247,6 +273,9 @@ default_decision: dep
 default_authorization_decision: /system/authz/allow
 
 persistence_directory: /tmp/opa
+
+decision_logs:
+  console: true
 ```
 
 and OPA run with TLS and the following arguments
@@ -254,9 +283,7 @@ and OPA run with TLS and the following arguments
 ```bash
 opa run -s -c <path-to-config-file>.yaml --addr https://0.0.0.0:<server-port> \
   --authentication=token --authorization=basic \
-  --tls-ca-cert-file <path-to-ca> --tls-cert-file <path-to-cert>.pem \
-  --tls-private-key-file <path-to-private-key> \
-  --log-level debug --log-format text
-  > ./logs/access.log \
-  2> ./logs/error.log
+  --tls-cert-file <path-to-cert>.pem --tls-private-key-file <path-to-private-key> \
+  --log-level debug --log-format text \
+  > /var/log/opa/error.log 2> /var/log/opa/access.log &
 ```
