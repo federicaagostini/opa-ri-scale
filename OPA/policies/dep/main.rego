@@ -2,7 +2,7 @@ package dep
 
 import data.dep.match.matched_policies
 import data.dep.validation.policy.policy_is_valid
-import dep.validation.rule.rule_is_valid
+import data.dep.validation.rule.rule_is_valid
 
 import rego.v1
 
