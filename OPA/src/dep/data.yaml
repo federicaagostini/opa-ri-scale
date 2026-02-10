@@ -9,8 +9,7 @@ policies:
       operator: eq
       rightOperand: https://refeds.org/profile/mfa
 - type: Set
-  uid: 1234
   permission:
-  - action: delete
+  - action: modify
     target: https://data.ri.eu/dataset/abc123
     assignee: urn:example:aai.example.org:group:project-ri:role=xfer
