@@ -10,6 +10,6 @@ policies:
       rightOperand: https://refeds.org/profile/mfa
 - type: Set
   permission:
-  - action: modify
+  - action: delete
     target: https://data.ri.eu/dataset/abc123
     assignee: urn:example:aai.example.org:group:project-ri:role=xfer
