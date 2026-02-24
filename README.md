@@ -257,7 +257,7 @@ start-opa.sh
 stop-opa.sh
 ```
 
-### Wrap-up
+### Manual deployment wrap-up
 
 Install OPA via RPM
 
@@ -303,3 +303,50 @@ and run OPA server with
 PATH=$PATH:<path-to-scripts>
 start-opa.sh
 ```
+
+### Deploy with Ansible
+
+This folder also allows to download, configure and start OPA with Ansible.
+It requires that the Ansible command line is installed in the machine where OPA runs.
+
+Install Ansible with
+
+```bash
+dnf install ansible -y
+```
+
+Clone this repo and add the required Personal Access Token to download the OPA bundle
+from GitHub
+
+```bash
+git clone https://github.com/federicaagostini/opa-ri-scale.git
+echo "opa_pat: \"ghp_xxxx\"" > ansible/vars/secrets.yml
+```
+
+Run the Ansible playbook (from any user able to be root) with
+
+```bash
+ansible-playbook -i ansible/inventory ansible/site.yml
+```
+
+OPA is embedded as systemd unit; verify that it has started successfully
+
+```bash
+$ systemctl status opa
+● opa.service - Open Policy Agent
+     Loaded: loaded (/etc/systemd/system/opa.service; enabled; preset: disabled)
+     Active: active (running) since Tue 2026-02-24 19:25:26 CET; 8min ago
+   Main PID: 623530 (opa)
+      Tasks: 9 (limit: 48652)
+     Memory: 14.3M (peak: 16.7M)
+        CPU: 380ms
+     CGroup: /system.slice/opa.service
+             └─623530 /usr/bin/opa run -s -c /etc/opa/config.yaml --addr https://0.0.0.0:8181 --authentication=token --authorization=basic --tls-cert-file /etc/opa/hostcert.pem --tls-private-key-file /etc/opa/hostkey.pem --log-level info --log-format json-pretty
+
+Feb 24 19:25:26 tape-dev.cloudcnaf systemd[1]: Started Open Policy Agent.
+```
+
+In case you want to modify some flag passed to the `opa run` command please edit the `/etc/sysconfig/opa` file.
+
+Ansible creates a self-signed certificate for OPA: in a production environment you should sobstitute the certificate
+(`/etc/opa/hostcert.pem`) and key (`/etc/opa/hostkey.pem`) files.
