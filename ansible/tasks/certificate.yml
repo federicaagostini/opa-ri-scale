@@ -22,14 +22,20 @@
   register: opa_privatekey
   ignore_errors: true
 
-- name: Generate self-signed certificate if not existing
+- name: Generate CSR with subject
+  community.crypto.openssl_csr:
+    path: /etc/opa/hostcsr.pem
+    privatekey_path: /etc/opa/hostkey.pem
+    common_name: "{{ inventory_hostname }}"
+    state: present
+
+- name: Generate self-signed certificate from CSR
   community.crypto.x509_certificate:
     path: /etc/opa/hostcert.pem
     privatekey_path: /etc/opa/hostkey.pem
-    #common_name: "{{ inventory_hostname }}"
+    csr_path: /etc/opa/hostcsr.pem
     provider: selfsigned
     selfsigned_not_after: +365d
-    selfsigned_not_before: +0s
     backup: true
     mode: '0644'
     state: present

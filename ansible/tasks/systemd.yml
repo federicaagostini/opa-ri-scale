@@ -4,6 +4,7 @@
     owner: root
     group: root
     mode: '0644'
+    force: no
     content: |
       PORT=8181
       CERT_FILE=/etc/opa/hostcert.pem
