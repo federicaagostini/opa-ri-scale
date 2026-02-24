@@ -40,8 +40,8 @@
         --tls-private-key-file ${KEY_FILE} \
         --log-level ${LOG_LEVEL} \
         --log-format json-pretty
-      StandardOutput=append:/var/log/opa/access.log
-      StandardError=append:/var/log/opa/error.log
+      StandardOutput=append:/var/log/opa/error.log
+      StandardError=append:/var/log/opa/access.log
       Restart=always
       RestartSec=5
       User=root
