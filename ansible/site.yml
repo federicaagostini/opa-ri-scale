@@ -1,6 +1,6 @@
 - name: Deploy OPA
   hosts: all
-  become: "{{ ansible_user != 'root' }}"
+  become: true
   become_method: sudo
 
   vars_files:
