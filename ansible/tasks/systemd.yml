@@ -6,15 +6,18 @@
     mode: '0644'
     force: no
     content: |
-      PORT=8181
-      CERT_FILE=/etc/opa/hostcert.pem
-      KEY_FILE=/etc/opa/hostkey.pem
-      LOG_LEVEL=info
+      PORT={{ opa_port }}
+      CERT_FILE={{ opa_cert_file }}
+      KEY_FILE={{ opa_key_file }}
+      CONFIG_FILE={{ opa_config_file }}
+      LOG_PATH={{ opa_log_path }}
+      LOG_LEVEL={{ opa_log_level }}
+      LOG_FORMAT={{ opa_log_format }}
   notify: Restart OPA
 
 - name: Ensure log directory exists
   ansible.builtin.file:
-    path: /var/log/opa
+    path: "{{ opa_log_path }}"
     state: directory
     owner: root
     group: root
@@ -34,16 +37,16 @@
       [Service]
       Type=simple
       EnvironmentFile=/etc/sysconfig/opa
-      ExecStart=/usr/bin/opa run -s -c /etc/opa/config.yaml \
+      ExecStart=/usr/bin/opa run -s -c ${CONFIG_FILE} \
         --addr https://0.0.0.0:${PORT} \
         --authentication=token \
         --authorization=basic \
         --tls-cert-file ${CERT_FILE} \
         --tls-private-key-file ${KEY_FILE} \
         --log-level ${LOG_LEVEL} \
-        --log-format json-pretty
-      StandardOutput=append:/var/log/opa/error.log
-      StandardError=append:/var/log/opa/access.log
+        --log-format ${LOG_FORMAT}
+      StandardOutput=append:{{ opa_log_path }}/error.log
+      StandardError=append:{{ opa_log_path }}/access.log
       Restart=always
       RestartSec=5
       User=root

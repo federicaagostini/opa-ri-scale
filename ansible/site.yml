@@ -5,6 +5,7 @@
 
   vars_files:
     - vars/secrets.yml
+    - vars/main.yml
 
   tasks:
     - import_tasks: tasks/install.yml

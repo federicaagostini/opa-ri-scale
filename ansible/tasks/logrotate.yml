@@ -1,6 +1,6 @@
 - name: Ensure log directory exists
   ansible.builtin.file:
-    path: /var/log/opa
+    path: "{{ opa_log_path }}"
     state: directory
     owner: root
     group: root
@@ -13,7 +13,7 @@
     group: root
     mode: '0644'
     content: |
-      /var/log/opa/*.log {
+      {{ opa_log_path }}/*.log {
           daily
           rotate 30
           dateext

@@ -13,7 +13,7 @@
 
 - name: Generate private key if not existing
   community.crypto.openssl_privatekey:
-    path: /etc/opa/hostkey.pem
+    path: "{{ opa_key_file }}"
     size: 4096
     type: RSA
     mode: '0600'
@@ -25,14 +25,14 @@
 - name: Generate CSR with subject
   community.crypto.openssl_csr:
     path: /etc/opa/hostcsr.pem
-    privatekey_path: /etc/opa/hostkey.pem
+    privatekey_path: "{{ opa_key_file }}"
     common_name: "{{ inventory_hostname }}"
     state: present
 
 - name: Generate self-signed certificate from CSR
   community.crypto.x509_certificate:
-    path: /etc/opa/hostcert.pem
-    privatekey_path: /etc/opa/hostkey.pem
+    path: "{{ opa_cert_file }}"
+    privatekey_path: "{{ opa_key_file }}"
     csr_path: /etc/opa/hostcsr.pem
     provider: selfsigned
     selfsigned_not_after: +365d

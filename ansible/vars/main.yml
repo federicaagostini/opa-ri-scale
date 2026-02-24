@@ -1,0 +1,7 @@
+opa_port: 8181
+opa_cert_file: /etc/opa/hostcert.pem
+opa_key_file: /etc/opa/hostkey.pem
+opa_config_file: /etc/opa/config.yaml
+opa_log_path: /var/log/opa
+opa_log_level: info
+opa_log_format: json-pretty
