@@ -10,6 +10,7 @@
       CERT_FILE=/etc/opa/hostcert.pem
       KEY_FILE=/etc/opa/hostkey.pem
       LOG_LEVEL=info
+  notify: Restart OPA
 
 - name: Ensure log directory exists
   ansible.builtin.file:
