@@ -1,0 +1,25 @@
+services:
+  gh:
+    url: https://ghcr.io
+    type: oci
+    credentials:
+      bearer:
+        scheme: "Bearer"
+        token: "{{ opa_pat }}"
+
+bundles:
+  dep:
+    service: gh
+    resource: ghcr.io/federicaagostini/opa-dep:latest
+    persist: true
+    polling:
+      min_delay_seconds: 100
+      max_delay_seconds: 200
+
+default_decision: dep
+default_authorization_decision: /system/authz/allow
+
+persistence_directory: /tmp/opa
+
+decision_logs:
+  console: true

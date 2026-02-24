@@ -1,0 +1,26 @@
+- name: Ensure log directory exists
+  ansible.builtin.file:
+    path: /var/log/opa
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+    
+- name: Configure logrotate for OPA
+  ansible.builtin.copy:
+    dest: /etc/logrotate.d/opa
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      /var/log/opa/*.log {
+          daily
+          rotate 30
+          dateext
+          dateformat -%Y%m%d-%H%M
+          missingok
+          notifempty
+          compress
+          delaycompress
+          copytruncate
+      }

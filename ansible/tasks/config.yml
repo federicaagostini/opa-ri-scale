@@ -1,0 +1,16 @@
+- name: Ensure /etc/opa exists
+  ansible.builtin.file:
+    path: /etc/opa
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Install OPA config
+  ansible.builtin.template:
+    src: opa_config.yml.j2
+    dest: /etc/opa/config.yaml
+    owner: root
+    group: root
+    mode: '0600'
+  notify: Restart OPA

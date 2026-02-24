@@ -1,0 +1,8 @@
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: yes
+
+- name: Restart OPA
+  ansible.builtin.systemd:
+    name: opa
+    state: restarted

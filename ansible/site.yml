@@ -1,0 +1,17 @@
+- name: Deploy OPA
+  hosts: all
+  become: "{{ ansible_user != 'root' }}"
+  become_method: sudo
+
+  vars_files:
+    - vars/secrets.yml
+
+  tasks:
+    - import_tasks: tasks/install.yml
+    - import_tasks: tasks/config.yml
+    - import_tasks:  tasks/certificate.yml
+    - import_tasks: tasks/systemd.yml
+    - import_tasks: tasks/logrotate.yml
+
+  handlers:
+    - import_tasks: handlers.yml

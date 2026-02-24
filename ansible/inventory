@@ -1,0 +1,2 @@
+# localhost ansible_connection=local
+opa-dev.cr.cnaf.infn.it ansible_host=131.154.163.24 ansible_user=almalinux

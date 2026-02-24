@@ -1,0 +1,35 @@
+- name: Ensure /etc/opa exists
+  ansible.builtin.file:
+    path: /etc/opa
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Ensure python3-cryptography is installed
+  ansible.builtin.dnf:
+    name: python3-cryptography
+    state: present
+
+- name: Generate private key if not existing
+  community.crypto.openssl_privatekey:
+    path: /etc/opa/hostkey.pem
+    size: 4096
+    type: RSA
+    mode: '0600'
+    state: present
+    backup: true
+  register: opa_privatekey
+  ignore_errors: true
+
+- name: Generate self-signed certificate if not existing
+  community.crypto.x509_certificate:
+    path: /etc/opa/hostcert.pem
+    privatekey_path: /etc/opa/hostkey.pem
+    #common_name: "{{ inventory_hostname }}"
+    provider: selfsigned
+    selfsigned_not_after: +365d
+    selfsigned_not_before: +0s
+    backup: true
+    mode: '0644'
+    state: present

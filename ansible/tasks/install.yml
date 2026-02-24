@@ -1,0 +1,11 @@
+- name: Install OPA repository
+  get_url:
+    url: https://repo.cloud.cnaf.infn.it/repository/opa/opa.repo
+    dest: /etc/yum.repos.d/opa.repo
+    mode: '0644'
+
+- name: Install opa package
+  dnf:
+    name: opa
+    state: present
+    update_cache: yes

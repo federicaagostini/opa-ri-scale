@@ -1,0 +1,57 @@
+- name: Create /etc/sysconfig/opa
+  ansible.builtin.copy:
+    dest: /etc/sysconfig/opa
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      PORT=8181
+      CERT_FILE=/etc/opa/hostcert.pem
+      KEY_FILE=/etc/opa/hostkey.pem
+      LOG_LEVEL=info
+
+- name: Ensure log directory exists
+  ansible.builtin.file:
+    path: /var/log/opa
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Create OPA systemd service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/opa.service
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      [Unit]
+      Description=Open Policy Agent
+      After=network.target
+
+      [Service]
+      Type=simple
+      EnvironmentFile=/etc/sysconfig/opa
+      ExecStart=/usr/bin/opa run -s -c /etc/opa/config.yaml \
+        --addr https://0.0.0.0:${PORT} \
+        --authentication=token \
+        --authorization=basic \
+        --tls-cert-file ${CERT_FILE} \
+        --tls-private-key-file ${KEY_FILE} \
+        --log-level ${LOG_LEVEL} \
+        --log-format json-pretty
+      StandardOutput=append:/var/log/opa/access.log
+      StandardError=append:/var/log/opa/error.log
+      Restart=always
+      RestartSec=5
+      User=root
+
+      [Install]
+      WantedBy=multi-user.target
+  notify: Reload systemd
+
+- name: Enable and start OPA service
+  ansible.builtin.systemd:
+    name: opa
+    enabled: yes
+    state: started
