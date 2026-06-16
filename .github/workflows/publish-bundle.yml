@@ -70,7 +70,7 @@ jobs:
 
       - name: Build OPA bundle
         run: |
-          opa build OPA/src --output dep.tar.gz
+          opa build -b OPA/src --output dep.tar.gz
 
       - name: Install ORAS
         run: |
