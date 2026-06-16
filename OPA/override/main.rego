@@ -2,4 +2,9 @@ package override
 
 import rego.v1
 
-allow := true
+default allow := false
+
+allow if {
+    some policy in data.dep.policies
+    policy.type == "Set"
+}
