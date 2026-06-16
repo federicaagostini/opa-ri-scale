@@ -1,4 +1,4 @@
-package dep.override
+package override
 
 import rego.v1
 
