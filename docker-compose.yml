@@ -60,14 +60,14 @@ services:
       GHCR_TOKEN: ${GHCR_TOKEN}
     
     volumes:
-      - ./OPA/override:/etc/opa/override
+      - ./override.tar.gz:/etc/opa/override.tar.gz
       - ./OPA/conf:/etc/opa/conf
 
     healthcheck:
       test: ["CMD", "curl", "http://localhost:8183/health"]
     
     command: > 
-      run --server /etc/opa/override
+      run --server
       --log-level debug --log-format text
       -c /etc/opa/conf/config-override.yaml
       --addr http://0.0.0.0:8183
