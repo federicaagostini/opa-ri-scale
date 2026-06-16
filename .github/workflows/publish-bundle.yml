@@ -36,10 +36,11 @@ jobs:
         run: |
           if [[ "${GITHUB_REF_TYPE}" = "tag" ]]; then
             BUNDLE_TAG="${GITHUB_REF_NAME}"
-          elif [ "${GITHUB_EVENT_NAME}" = "push" ] || [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+          elif [[ "${GITHUB_REF_NAME}" == "main" ]]; then
             BUNDLE_TAG="${GITHUB_SHA::8}"
           else
-            BUNDLE_TAG="latest"
+            # Tag is equal to the branch name
+            BUNDLE_TAG="${GITHUB_REF_NAME//\//-}"
           fi
           echo "Bundle tag: $BUNDLE_TAG"
           echo "BUNDLE_TAG=${BUNDLE_TAG}" >> $GITHUB_ENV
@@ -94,11 +95,8 @@ jobs:
 
           echo "{}" > manifest.config
 
-          oras push ${IMAGE}:latest --config manifest.config:${MT_CONF} dep.tar.gz:${MT_IMAGE}
-
-          if [ "${BUNDLE_TAG}" = "latest" ]; then
-            echo "BUNDLE_TAG is latest, done."
-            exit 0
+          if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
+            oras push ${IMAGE}:latest --config manifest.config:${MT_CONF} dep.tar.gz:${MT_IMAGE}
           fi
           oras push ${IMAGE}:${BUNDLE_TAG} --config manifest.config:${MT_CONF} dep.tar.gz:${MT_IMAGE}
 

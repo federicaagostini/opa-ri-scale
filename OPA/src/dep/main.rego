@@ -10,10 +10,20 @@ default allow := false
 default allow_and_valid := false
 
 allow if {
+    data.dep.override.allow
+}
+
+allow if {
+    not data.dep.override.allow
     count(matched_policies) > 0
 }
 
 allow_and_valid if {
+    data.dep.override.allow
+}
+
+allow_and_valid if {
+    not data.dep.override.allow
     allow
     some policy in matched_policies
     policy_is_valid(policy)
