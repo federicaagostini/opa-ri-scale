@@ -1,10 +1,27 @@
 # Deploy and configure an OPA server
 
-To expose an OPA server which downloads the remote bundle and makes policy decisions we can use Ansible. Here are shown also other means, such as docker or the RPM which installs the OPA CLI. In this documentation we also explain how to further customize the OPA service configuration.
+To expose an OPA server which downloads the remote bundle and makes policy decisions we can use Docker. Here are shown also other means, such as Ansible or the RPM which both install the OPA CLI. In this documentation we also explain how to further customize the OPA service configuration.
 
 ## Deployment
 
-### Deploy and run with Ansible
+### Docker container
+
+To run opa with docker the minimal arguments required (note that access and error logs are swaped in OPA) are
+
+```bash
+docker run -p <server-port>:<server-port> \
+  -v <path-to-config-file>:/etc/opa/opa-conf.yaml \
+  -v /var/log/opa:/logs \
+  openpolicyagent/opa:latest \
+  run -s -c /etc/opa/opa-conf.yaml --addr http://localhost:<server-port> \
+  > ./logs/error.log \
+  2> ./logs/access.log &
+```
+
+The `run` command of the OPA CLI may accept further options; please check the below **OPA run CLI options** section.
+Also, in order to polulate your configuration file please refer to the below **Configuration** section. 
+
+### Ansible
 
 In order to configure and start OPA with Ansible you require that the Ansible command line is installed in the machine where OPA runs.
 
@@ -49,21 +66,8 @@ In case you want to modify some flag passed to the `opa run` command please edit
 Ansible creates a self-signed certificate for OPA: in a production environment you should sobstitute the certificate
 (`/etc/opa/hostcert.pem`) and key (`/etc/opa/hostkey.pem`) files.
 
-### Run with Docker
 
-To run opa with docker the minimal arguments required (note that access and error logs are swaped in OPA) are
-
-```bash
-docker run -p <server-port>:<server-port> \
-  -v <path-to-config-file>:/etc/opa/opa-conf.yaml \
-  -v /var/log/opa:/logs \
-  openpolicyagent/opa:latest \
-  run -s -c /etc/opa/opa-conf.yaml --addr http://localhost:<server-port> \
-  > ./logs/error.log \
-  2> ./logs/access.log &
-```
-
-### Run with RPM
+### RPM
 
 We have made available OPA trough RPM. The RPM just downloads the last OPA cli and installs it in the OS.
 
@@ -88,6 +92,9 @@ opa run -s -c <path-to-config-file> --addr http://localhost:<server-port> \
   2> ./logs/access.log &
 ```
 
+The `opa run` command may accept further options; please check the below **OPA run CLI options** section.
+Also, in order to polulate your configuration file please refer to the below **Configuration** section. 
+
 #### Start and stop OPA
 
 This repo contains scripts to [start](./scripts/start-opa.sh) (with defaults) and [stop](./scripts/stop-opa.sh) OPA. The scripts can be run by any folder.
@@ -108,6 +115,35 @@ To and stop OPA, add the folder to the PATH variable and type
 PATH=$PATH:<path-to-scripts>
 start-opa.sh
 stop-opa.sh
+```
+
+### OPA run CLI options
+
+The `opa run` command allows you to add several flags, for instance
+
+- `authentication`: set the authentication schema. Possible values are token, tls, off
+- `authorization`: set the authorization schema. Possible values are basic, off
+- `config-file`: path for the configuration file
+- `log-level`: set the log level. Possible values are debug, info, error
+- `log-format`: set log format. Possible values are text, json, json-pretty
+- `watch`: supports a live reload for the OPA source code (_rego_)
+- `set`: requires a key-value string which overrides the configuration
+
+Fore a full list of configuration please check the [documentation](https://www.openpolicyagent.org/docs/cli#run).
+
+#### TLS
+
+In a production environment we strongly recomand to expose OPA with HTTPS.
+So, first of all request a certificate for the OPA instance and add the following flags to the `opa run` commands
+
+```bash
+--tls-cert-file <path-to-certificate>.pem --tls-private-key-file <path-to-private-key>.pem
+```
+
+you should also modify the `addr` flag with something like
+
+```bash
+--addr https://0.0.0.0:<server-port>
 ```
 
 ## Configuration
@@ -183,35 +219,37 @@ decision_logs:
   console: true
 ```
 
+A comprensive OPA configuration file would be
+
+```yml
+services:
+  gh:
+    url: https://ghcr.io
+    type: oci
+    credentials:
+      bearer:
+        scheme: "Bearer"
+        token: "<PAT>"
+
+bundles:
+  dep:
+    service: gh
+    resource: ghcr.io/ri-scale/opa-dep:latest
+    persist: true
+    polling:
+      min_delay_seconds: 100
+      max_delay_seconds: 200
+
+default_decision: dep
+default_authorization_decision: /system/authz/allow
+
+persistence_directory: /tmp/opa
+
+decision_logs:
+  console: true
+```
+
 For other configuration parameters see the [OPA documentation](https://www.openpolicyagent.org/docs/configuration).
 
-### Run configurations
-
-The `opa run` command allows you to add several flags, for instance
-
-- `authentication`: set the authentication schema. Possible values are token, tls, off
-- `authorization`: set the authorization schema. Possible values are basic, off
-- `config-file`: path for the configuration file
-- `log-level`: set the log level. Possible values are debug, info, error
-- `log-format`: set log format. Possible values are text, json, json-pretty
-- `watch`: supports a live reload for the OPA source code (_rego_)
-- `set`: requires a key-value string which overrides the configuration
-
-Fore a full list of configuration please check the [documentation](https://www.openpolicyagent.org/docs/cli#run).
-
-#### TLS
-
-In a production environment we strongly recomand to expose OPA with HTTPS.
-So, first of all request a certificate for the OPA instance and add the following flags to the `opa run` commands
-
-```bash
---tls-cert-file <path-to-certificate>.pem --tls-private-key-file <path-to-private-key>.pem
-```
-
-you should also modify the `addr` flag with something like
-
-```bash
---addr https://0.0.0.0:<server-port>
-```
 
 
