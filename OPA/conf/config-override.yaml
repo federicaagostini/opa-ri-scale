@@ -1,0 +1,24 @@
+services:
+  gh:
+    url: https://ghcr.io
+    type: oci
+    credentials:
+      bearer:
+        scheme: "Bearer"
+        token: ${GHCR_TOKEN}
+  local:
+    url: file://
+
+bundles:
+  dep:
+    service: gh
+    resource: ghcr.io/ri-scale/opa-dep:allow-overriding-policies
+    polling:
+      min_delay_seconds: 10
+      max_delay_seconds: 20
+  override:
+    service: local
+    resource: file:////etc/opa/override.tar.gz
+
+default_decision: dep
+default_authorization_decision: /system/authz/allow
