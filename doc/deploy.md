@@ -18,8 +18,8 @@ docker run -p <server-port>:<server-port> \
   2> ./logs/access.log &
 ```
 
-The `run` command of the OPA CLI may accept further options; please check the below **OPA run CLI options** section.
-Also, in order to polulate your configuration file please refer to the below **Configuration** section. 
+The `run` command of the OPA CLI may accept further options; please check the [OPA run CLI options](#opa-run-cli-options) section.
+Also, in order to polulate your configuration file please refer to the [Configuration](#configuration) section. 
 
 ### Ansible
 
@@ -92,8 +92,8 @@ opa run -s -c <path-to-config-file> --addr http://localhost:<server-port> \
   2> ./logs/access.log &
 ```
 
-The `opa run` command may accept further options; please check the below **OPA run CLI options** section.
-Also, in order to polulate your configuration file please refer to the below **Configuration** section. 
+The `opa run` command may accept further options; please check the [OPA run CLI options](#opa-run-cli-options) section.
+Also, in order to polulate your configuration file please refer to the [Configuration](#configuration) section. 
 
 #### Start and stop OPA
 
